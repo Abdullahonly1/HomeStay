@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="bn" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - HomeStayBD</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #ff385c;
+            --light-bg: #f7f7f7;
+            --card-radius: 16px;
+        }
+
+        [data-bs-theme="dark"] {
+            --primary: #0d6efd;
+            --light-bg: #121212;
+            --dark-card: #1e1e1e;
+            --dark-text: #e0e0e0;
+        }
+
+        body { background: var(--light-bg); padding-top: 90px; transition: all 0.4s; }
+
+        .navbar { background: white; border-bottom: 1px solid #eee; backdrop-filter: blur(10px); }
+        [data-bs-theme="dark"] .navbar { background: rgba(30,30,30,0.9); }
+
+        .brand { color: var(--primary); font-weight: 700; font-size: 24px; }
+
+        .search-box {
+            border: 1px solid #ddd;
+            border-radius: 50px;
+            padding: 6px 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            background: white;
+            max-width: 380px;
+        }
+        [data-bs-theme="dark"] .search-box { background: #2c2c2c; border-color: #444; }
+
+        .category-scroll { display: flex; overflow-x: auto; gap: 25px; padding: 15px 0; scrollbar-width: none; }
+        .category-scroll::-webkit-scrollbar { display: none; }
+        .category-item { text-align: center; cursor: pointer; font-size: 14px; min-width: 70px; }
+
+        .room-card {
+            border: none;
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            transition: all 0.35s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            cursor: pointer;
+        }
+        .room-card:hover { transform: translateY(-8px); box-shadow: 0 12px 32px rgba(0,0,0,0.15); }
+
+        .room-card img { height: 160px; object-fit: cover; }
+
+        .room-card .card-body { padding: 12px; }
+        .room-card h6, .room-card h5 { font-size: 14px; margin-bottom: 4px; }
+        .price { font-weight: 600; font-size: 15px; }
+
+        .wishlist-heart {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 22px;
+            color: white;
+            text-shadow: 0 0 4px black;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .wishlist-heart.filled { color: var(--primary); }
+
+        .filter-bar {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        [data-bs-theme="dark"] .filter-bar { background: #1e1e1e; }
+
+        footer { background: #343a40; }
+    </style>
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<nav class="navbar fixed-top py-3">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div class="brand">HomeStayBD</div>
+
+        <div class="search-box">
+            <i class="fas fa-location-dot"></i>
+            <input type="text" id="search-input" class="border-0 outline-0 flex-grow-1" placeholder="Search location or title..." style="outline:none;background:transparent">
+            <button class="btn btn-sm btn-danger rounded-circle" onclick="searchRooms()">
+                <i class="fas fa-search text-white"></i>
+            </button>
+        </div>
+
+        <div class="d-flex align-items-center gap-4">
+            <button class="btn btn-outline-secondary rounded-circle p-2" id="dark-mode-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <i class="fas fa-heart" onclick="window.location.href='wishlist.html'" style="cursor:pointer;font-size:20px;"></i>
+            <i class="fas fa-bell" style="font-size:20px;"></i>
+
+            <div class="dropdown">
+                <button class="btn border rounded-pill px-3 dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="fas fa-user"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="my-trips.html">My Trips</a></li>
+                    <li><a class="dropdown-item" href="wishlist.html">Wishlists</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="#" onclick="logout()">লগআউট</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+
+    <!-- CATEGORY SECTION -->
+    <div class="category-scroll my-4">
+        <div class="category-item"><i class="fas fa-umbrella-beach fa-lg"></i><div>Beach</div></div>
+        <div class="category-item"><i class="fas fa-tree fa-lg"></i><div>Cabins</div></div>
+        <div class="category-item"><i class="fas fa-fire fa-lg"></i><div>Trending</div></div>
+        <div class="category-item"><i class="fas fa-mountain fa-lg"></i><div>Amazing Views</div></div>
+        <div class="category-item"><i class="fas fa-city fa-lg"></i><div>City</div></div>
+        <div class="category-item"><i class="fas fa-building fa-lg"></i><div>Apartments</div></div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar d-flex justify-content-between align-items-center my-4">
+        <div>
+            <select class="form-select" id="sort-select" onchange="sortRooms()">
+                <option value="">Sort by</option>
+                <option value="price-asc">Price Low → High</option>
+                <option value="price-desc">Price High → Low</option>
+                <option value="rating-desc">Rating High to Low</option>
+            </select>
+        </div>
+        <div>
+            <button class="btn btn-outline-secondary">
+                <i class="fas fa-sliders"></i> Filters
+            </button>
+        </div>
+    </div>
+
+    <!-- ROOM LIST -->
+    <div class="row g-3 mb-5" id="all-rooms-list">
+        <div class="col-12 text-center py-5">
+            <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;"></div>
+            <p class="mt-3">রুম লোড হচ্ছে...</p>
+        </div>
+    </div>
+
+</div>
+
+<footer class="bg-dark text-light text-center py-4 mt-5">
+    © ২০২৬ HomeStayBD
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    let allRooms = [];
+
+    document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-bs-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-bs-theme', next);
+        document.getElementById('dark-mode-toggle').innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    });
+
+    function logout() {
+        localStorage.removeItem('token');
+        window.location.href = "/";
+    }
+
+    async function loadAllRooms() {
+        const container = document.getElementById("all-rooms-list");
+        container.innerHTML = `<div class="col-12 text-center py-5"><div class="spinner-border text-danger"></div><p class="mt-3">রুম লোড হচ্ছে...</p></div>`;
+
+        try {
+            const res = await fetch("http://localhost:8080/api/rooms");
+            if (!res.ok) throw new Error();
+            allRooms = await res.json();
+            renderRooms(allRooms);
+        } catch (err) {
+            container.innerHTML = '<p class="text-danger text-center py-5">রুম লোড করতে সমস্যা হয়েছে</p>';
+        }
+    }
+
+    function renderRooms(rooms) {
+    const container = document.getElementById("all-rooms-list");
+    container.innerHTML = "";
+    if (rooms.length === 0) {
+        container.innerHTML = '<p class="text-center text-muted py-5">কোনো রুম পাওয়া যায়নি</p>';
+        return;
+    }
+
+    rooms.forEach(room => {
+        const price = room.price || 0;
+        const isWishlisted = room.isWishlisted || false;  // ← backend থেকে আসবে
+
+        container.innerHTML += `
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+            <div class="card room-card h-100 position-relative" onclick="viewRoomDetails(${room.id})">
+                <img src="http://localhost:8080${room.imagePath || '/images/placeholder-room.jpg'}" class="card-img-top">
+                <i class="fas fa-heart wishlist-heart ${isWishlisted ? 'filled' : ''}"
+                   onclick="toggleWishlist(event, ${room.id})"></i>
+                <div class="card-body p-2">
+                    <h6 class="mb-1 text-muted">${room.location || ''}</h6>
+                    <h5 class="fs-6 mb-1">${room.title}</h5>
+                    <div class="price fs-6">৳ ${price} / রাত</div>
+                </div>
+            </div>
+        </div>`;
+    });
+}
+
+    function searchRooms() {
+        const query = document.getElementById('search-input').value.toLowerCase().trim();
+        const filtered = allRooms.filter(r =>
+            (r.location || '').toLowerCase().includes(query) ||
+            (r.title || '').toLowerCase().includes(query)
+        );
+        renderRooms(filtered);
+    }
+
+    function sortRooms() {
+        const value = document.getElementById('sort-select').value;
+        let sorted = [...allRooms];
+
+        if (value === 'price-asc') sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
+        else if (value === 'price-desc') sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
+        else if (value === 'rating-desc') sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+
+        renderRooms(sorted);
+    }
+
+    async function toggleWishlist(e, roomId) {
+        e.stopPropagation();
+        const token = localStorage.getItem('token');
+        if (!token) return alert('লগইন করুন উইশলিস্ট যোগ করতে');
+
+        const heart = e.target;
+        const isFilled = heart.classList.contains('filled');
+        const url = isFilled ? `/wishlist/remove/${roomId}` : `/wishlist/add/${roomId}`;
+
+        try {
+            const res = await fetch(`http://localhost:8080${url}`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                heart.classList.toggle('filled');
+                alert(isFilled ? 'উইশলিস্ট থেকে রিমুভ হয়েছে' : 'উইশলিস্টে যোগ হয়েছে');
+            } else {
+                alert('উইশলিস্ট আপডেট ফেল');
+            }
+        } catch (err) {
+            alert('সার্ভারে সমস্যা');
+        }
+    }
+
+    function viewRoomDetails(roomId) {
+        window.location.href = `/room-details.html?id=${roomId}`;
+    }
+
+    // INIT
+    window.onload = () => {
+        loadAllRooms();
+    };
+</script>
+
+</body>
+</html>

@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Details - HomeStayBD</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+    <style>
+        body{
+            font-family: 'Inter', sans-serif;
+            background:#fff;
+            color:#222;
+        }
+
+        .navbar{
+            background:#fff;
+            border-bottom:1px solid #eee;
+        }
+
+        .gallery img{
+            width:100%;
+            height:250px;
+            object-fit:cover;
+            border-radius:12px;
+        }
+
+        .section-title{
+            font-size:22px;
+            font-weight:700;
+            margin-top:40px;
+        }
+
+        .price-card{
+            border:1px solid #ddd;
+            border-radius:16px;
+            padding:25px;
+            position:sticky;
+            top:100px;
+            box-shadow:0 8px 25px rgba(0,0,0,0.08);
+        }
+
+        .rating-star{
+            color:#ff385c;
+        }
+
+        .amenity-item{
+            margin-bottom:10px;
+        }
+
+        .rule-box{
+            background:#f7f7f7;
+            padding:12px;
+            border-radius:8px;
+            margin-bottom:8px;
+        }
+
+        .review-box{
+            border-bottom:1px solid #eee;
+            padding-bottom:15px;
+            margin-bottom:15px;
+        }
+
+        .host-box{
+            display:flex;
+            align-items:center;
+            gap:15px;
+        }
+
+        .host-box img{
+            width:60px;
+            height:60px;
+            border-radius:50%;
+        }
+
+        .map-container iframe{
+            width:100%;
+            height:350px;
+            border-radius:12px;
+            border:0;
+        }
+
+        .chat-message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .chat-message.sent {
+            background: #dc3545;
+            color: white;
+            margin-left: 20%;
+            text-align: right;
+        }
+
+        .chat-message.received {
+            background: #f1f1f1;
+            margin-right: 20%;
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-danger" href="#">HomeStayBD</a>
+        <button class="btn btn-outline-danger" onclick="logout()">Logout</button>
+    </div>
+</nav>
+
+<div class="container" style="margin-top:100px;">
+
+    <!-- TITLE -->
+    <h2 id="room-title" class="fw-bold"></h2>
+    <p class="text-muted" id="room-location"></p>
+    <div class="mb-3">
+        <span class="rating-star">★ <span id="overall-rating">4.8</span></span>
+        <span id="review-count">(0 reviews)</span>
+    </div>
+
+    <!-- IMAGE GALLERY - FIXED -->
+    <div class="row g-3 gallery mb-4" id="image-gallery">
+        <!-- JS দিয়ে dynamically ভরা হবে -->
+    </div>
+
+    <div class="row">
+
+        <!-- LEFT CONTENT -->
+        <div class="col-lg-7">
+
+            <!-- Overview -->
+            <div class="section-title">🏠 Overview</div>
+            <p id="room-overview">
+                Entire home · 4 guests · 2 bedrooms · 2 beds · 1 bath
+            </p>
+
+            <hr>
+
+            <!-- Description -->
+            <div class="section-title">📝 About this place</div>
+            <p id="room-description"></p>
+
+            <hr>
+
+            <!-- Amenities -->
+            <div class="section-title">🛏️ What this place offers</div>
+            <div class="row mt-3" id="room-facilities"></div>
+
+            <hr>
+
+            <!-- Map -->
+            <div class="section-title">📍 Location</div>
+            <div class="map-container mb-3">
+                <iframe id="map-iframe"></iframe>
+            </div>
+            <p>Exact location will be shared after booking.</p>
+
+            <hr>
+
+            <!-- Reviews -->
+            <div class="section-title">⭐ Reviews</div>
+
+            <div id="review-list"></div>
+
+            <h6 class="mt-4">Leave a review</h6>
+            <div class="mb-2">
+                <select id="rating-input" class="form-select">
+                    <option value="5">5 ★</option>
+                    <option value="4">4 ★</option>
+                    <option value="3">3 ★</option>
+                    <option value="2">2 ★</option>
+                    <option value="1">1 ★</option>
+                </select>
+            </div>
+            <textarea id="review-text" class="form-control mb-2" placeholder="Write your review..."></textarea>
+            <button class="btn btn-danger" onclick="submitReview()">Submit Review</button>
+
+            <hr>
+
+            <!-- House Rules -->
+            <div class="section-title">📜 House Rules</div>
+            <div class="rule-box">No smoking</div>
+            <div class="rule-box">No parties or events</div>
+            <div class="rule-box">Pets allowed</div>
+            <div class="rule-box">Quiet hours after 10PM</div>
+
+            <hr>
+
+            <!-- Safety -->
+            <div class="section-title">🔐 Safety & Policies</div>
+            <p>Smoke alarm installed</p>
+            <p>Fire extinguisher available</p>
+            <p>Free cancellation within 48 hours</p>
+
+            <hr>
+
+            <!-- Host -->
+            <div class="section-title">👤 Hosted by <span id="host-name"></span></div>
+            <div class="host-box mt-3">
+                <img src="https://i.pravatar.cc/100">
+                <div>
+                    <p id="host-since">Host since 2023</p>
+                    <p>Response rate: 100%</p>
+                    <p>Usually responds within 1 hour</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- BOOKING CARD -->
+        <div class="col-lg-5">
+            <div class="price-card">
+
+                <h4><span id="room-price">৳ 0</span> / night</h4>
+
+                <label>Check-in</label>
+                <input type="date" class="form-control mb-2" id="check-in" onchange="calculatePrice()">
+
+                <label>Check-out</label>
+                <input type="date" class="form-control mb-2" id="check-out" onchange="calculatePrice()">
+
+                <label>Guests</label>
+                <input type="number" class="form-control mb-3" id="persons" value="1" min="1" onchange="calculatePrice()">
+
+                <hr>
+
+                <p>Night × Days: <span id="price-breakdown"></span></p>
+                <p>Cleaning fee: ৳ 500</p>
+                <p>Service fee: ৳ 300</p>
+                <p>Tax: ৳ 200</p>
+
+                <hr>
+
+                <h5>Total: <span id="total-price">৳ 0</span></h5>
+
+                <button class="btn btn-danger w-100 mb-2" onclick="createBooking()">Reserve</button>
+                <button class="btn btn-outline-dark w-100" onclick="document.getElementById('chat-section').scrollIntoView()">Contact Host</button>
+
+                <p class="text-center text-muted mt-2">You won’t be charged yet</p>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CHAT - IMPROVED UI -->
+    <div class="mt-5" id="chat-section">
+        <h5>💬 Message Host</h5>
+        <div id="chat-messages" style="height:300px; overflow-y:auto; border:1px solid #ddd; border-radius:8px; padding:15px; background:#f8f9fa;"></div>
+        <div class="input-group mt-3">
+            <input type="text" class="form-control" id="chat-input" placeholder="Type your message...">
+            <button class="btn btn-danger" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/review.js"></script>
+
+<script>
+
+    const roomId = new URLSearchParams(window.location.search).get('id');
+    let roomPricePerNight = 0;
+    let currentUser = null;
+    let pollingInterval = null;
+
+    const CLEANING_FEE = 500;
+    const SERVICE_FEE = 300;
+    const TAX = 200;
+    const BACKEND_URL = 'http://localhost:8080';
+
+    /* =========================
+       LOAD ROOM DETAILS - FIXED
+    ========================= */
+    async function loadRoom() {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${BACKEND_URL}/api/rooms/${roomId}`, {
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+            });
+
+            if (!res.ok) throw new Error("Room not found: " + res.status);
+
+            const room = await res.json();
+            console.log("Room details from backend:", room);
+
+            // Title & Location
+            document.getElementById("room-title").textContent = room.title || "No Title";
+            document.getElementById("room-location").textContent = room.location || "Location not available";
+
+            // Host Info
+            document.getElementById("host-name").textContent = room.host?.username || "Host";
+            document.getElementById("host-since").textContent = "Host since " + (room.host?.createdAt?.substring(0,4) || "2023");
+
+            // Overview
+            document.getElementById("room-overview").textContent =
+                `${room.propertyType || "Entire home"} · ${room.maxGuests || 4} guests · ${room.bedrooms || 2} bedrooms · ${room.beds || 2} beds · ${room.bathrooms || 1} bath`;
+
+            // Description
+            document.getElementById("room-description").textContent = room.description || "No description provided.";
+
+            // Price - FIXED
+            roomPricePerNight = Number(room.price || room.pricePerNight || 0);
+            document.getElementById("room-price").textContent = `৳ ${roomPricePerNight.toFixed(0)}`;
+
+            // Facilities
+            const facilityContainer = document.getElementById("room-facilities");
+            facilityContainer.innerHTML = "";
+            if (room.facilities) {
+                const items = room.facilities.split(",");
+                items.forEach(item => {
+                    const trimmed = item.trim();
+                    if (trimmed) {
+                        facilityContainer.innerHTML += `
+                            <div class="col-md-6 amenity-item">
+                                <i class="fas fa-check text-success"></i> ${trimmed}
+                            </div>`;
+                    }
+                });
+            }
+
+            // IMAGE GALLERY - FIXED (real images)
+            const galleryContainer = document.getElementById("image-gallery");
+            galleryContainer.innerHTML = "";
+
+            let allImages = [];
+
+            // Main image
+            if (room.imagePath) {
+                allImages.push(room.imagePath);
+            }
+
+            // Additional images
+            if (room.additionalImages && Array.isArray(room.additionalImages) && room.additionalImages.length > 0) {
+                allImages = allImages.concat(room.additionalImages);
+            }
+
+            // Fallback if no images
+            if (allImages.length === 0) {
+                allImages.push("/images/placeholder-room.jpg");
+            }
+
+            // Render gallery
+            if (allImages.length === 1) {
+                galleryContainer.innerHTML = `
+                    <div class="col-12">
+                        <img src="${BACKEND_URL}${allImages[0]}" class="img-fluid rounded" style="height:500px; width:100%; object-fit:cover;" onerror="this.src='/images/placeholder-room.jpg'">
+                    </div>`;
+            } else {
+                galleryContainer.innerHTML = `
+                    <div class="col-md-6">
+                        <img src="${BACKEND_URL}${allImages[0]}" class="img-fluid rounded" style="height:500px; width:100%; object-fit:cover;" onerror="this.src='/images/placeholder-room.jpg'">
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row g-3">
+                            ${allImages.slice(1).map(img => `
+                                <div class="col-6">
+                                    <img src="${BACKEND_URL}${img}" class="img-fluid rounded" style="height:242px; width:100%; object-fit:cover;" onerror="this.src='/images/placeholder-room.jpg'">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>`;
+            }
+
+            // Google Map
+            document.getElementById("map-iframe").src =
+                `https://www.google.com/maps?q=${encodeURIComponent(room.location || 'Dhaka')}&output=embed`;
+
+            // Default Dates
+            const today = new Date().toISOString().split("T")[0];
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById("check-in").value = today;
+            document.getElementById("check-out").value = tomorrow.toISOString().split("T")[0];
+
+            calculatePrice();
+            loadReviews();
+            checkAuthAndShowChat();
+
+        } catch (err) {
+            console.error("Room load error:", err);
+            alert("রুমের তথ্য লোড করতে সমস্যা হয়েছে");
+        }
+    }
+
+    /* =========================
+       PRICE CALCULATION
+    ========================= */
+    function calculatePrice() {
+        const checkIn = new Date(document.getElementById("check-in").value);
+        const checkOut = new Date(document.getElementById("check-out").value);
+        const persons = parseInt(document.getElementById("persons").value) || 1;
+
+        if (isNaN(checkIn) || isNaN(checkOut)) return;
+
+        const days = Math.max(1, Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24)));
+        const nightTotal = days * roomPricePerNight * persons;
+
+        document.getElementById("price-breakdown").textContent = `৳ ${nightTotal.toFixed(0)}`;
+
+        const total = nightTotal + CLEANING_FEE + SERVICE_FEE + TAX;
+        document.getElementById("total-price").textContent = `৳ ${total.toFixed(0)}`;
+    }
+
+    /* =========================
+   BOOKING
+========================= */
+async function createBooking() {
+    // ফর্মের ইনপুট নেওয়া
+    const checkInInput = document.getElementById("check-in");
+    const checkOutInput = document.getElementById("check-out");
+    const personsInput = document.getElementById("persons");
+    const bookingBtn = document.getElementById("booking-btn"); // বুকিং বাটনের ID দাও
+
+    const checkIn = checkInInput?.value;
+    const checkOut = checkOutInput?.value;
+    const persons = parseInt(personsInput?.value) || 1;
+
+    // বেসিক ভ্যালিডেশন
+    if (!checkIn || !checkOut) {
+        alert("চেক-ইন এবং চেক-আউট তারিখ দিন!");
+        return;
+    }
+    if (new Date(checkIn) >= new Date(checkOut)) {
+        alert("চেক-আউট তারিখ চেক-ইনের পরে হতে হবে!");
+        return;
+    }
+    if (persons < 1) {
+        alert("কমপক্ষে ১ জন গেস্ট থাকতে হবে!");
+        return;
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("লগইন করুন!");
+        window.location.href = "/login.html"; // লগইন পেজে পাঠানো যেতে পারে
+        return;
+    }
+
+    // লোডিং স্টেট শুরু
+    if (bookingBtn) {
+        bookingBtn.disabled = true;
+        bookingBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> বুকিং হচ্ছে...';
+    }
+
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/bookings`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                roomId: parseInt(roomId),          // roomId গ্লোবাল/পেজ থেকে নেওয়া
+                checkInDate: checkIn,              // yyyy-mm-dd ফরম্যাটে আসবে
+                checkOutDate: checkOut,
+                numberOfPersons: persons
+            })
+        });
+
+        const data = await response.json(); // JSON হিসেবে পড়া (backend JSON রিটার্ন করে)
+
+        if (response.ok) {
+            // সফল হলে
+            console.log("Booking success:", data);
+            alert("🎉 বুকিং সফল হয়েছে!");
+            // অথবা SweetAlert ব্যবহার করতে পারো
+            // Swal.fire("সফল!", "বুকিং সম্পন্ন হয়েছে", "success");
+
+            window.location.href = "/user-dashboard.html";
+        } else {
+            // এরর হ্যান্ডলিং
+            console.error("Booking failed:", response.status, data);
+            const errorMsg = data.message || data.error || "অজানা সমস্যা";
+            alert("বুকিং ব্যর্থ: " + errorMsg);
+
+            if (response.status === 401) {
+                alert("সেশন মেয়াদ শেষ। আবার লগইন করুন।");
+                localStorage.removeItem("token");
+                window.location.href = "/login.html";
+            }
+        }
+    } catch (err) {
+        console.error("Booking network error:", err);
+        alert("সার্ভারের সাথে সংযোগ সমস্যা: " + err.message);
+    } finally {
+        // লোডিং শেষ
+        if (bookingBtn) {
+            bookingBtn.disabled = false;
+            bookingBtn.innerHTML = "বুক করুন";
+        }
+    }
+}
+
+    /* =========================
+       REVIEWS (UNCHANGED)
+    ========================= */
+    async function loadReviews() {
+        try {
+            const res = await fetch(`${BACKEND_URL}/reviews/room/${roomId}`);
+            if (!res.ok) return;
+
+            const reviews = await res.json();
+            const list = document.getElementById("review-list");
+            list.innerHTML = "";
+
+            let totalRating = 0;
+
+            reviews.forEach(r => {
+                totalRating += r.rating;
+                list.innerHTML += `
+                <div class="review-box">
+                    <strong>${r.userName || "Anonymous"}</strong>
+                    <div>★ ${r.rating}</div>
+                    <p>${r.comment || "No comment"}</p>
+                </div>`;
+            });
+
+            if (reviews.length > 0) {
+                const avg = (totalRating / reviews.length).toFixed(1);
+                document.getElementById("overall-rating").textContent = avg;
+                document.getElementById("review-count").textContent = `(${reviews.length} reviews)`;
+            }
+        } catch (err) {
+            console.error("Reviews load error:", err);
+        }
+    }
+
+    async function submitReview() {
+        const rating = document.getElementById("rating-input").value;
+        const comment = document.getElementById("review-text").value.trim();
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            alert("Login required!");
+            return;
+        }
+
+        if (!comment) {
+            alert("Please write a review");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${BACKEND_URL}/reviews`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    roomId: parseInt(roomId),
+                    rating: parseInt(rating),
+                    comment
+                })
+            });
+
+            if (res.ok) {
+                document.getElementById("review-text").value = "";
+                loadReviews();
+                alert("Review submitted!");
+            } else {
+                alert("Review submission failed");
+            }
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    }
+
+    /* =========================
+       CHAT SYSTEM - IMPROVED
+    ========================= */
+    async function checkAuthAndShowChat() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            document.getElementById('chat-messages').innerHTML = '<p class="text-muted">লগইন করলে হোস্টের সাথে চ্যাট করতে পারবেন</p>';
+            return;
+        }
+
+        try {
+            const res = await fetch(`${BACKEND_URL}/auth/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!res.ok) throw new Error("Auth failed");
+
+            currentUser = await res.json();
+            loadMessages();
+            startPolling();
+        } catch (err) {
+            console.error("Auth error:", err);
+        }
+    }
+
+    async function loadMessages() {
+        if (!currentUser) return;
+
+        try {
+            const res = await fetch(`${BACKEND_URL}/chat/room/${roomId}`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+
+            if (!res.ok) throw new Error("Chat load failed");
+
+            const messages = await res.json();
+            const chatBox = document.getElementById("chat-messages");
+            chatBox.innerHTML = "";
+
+            messages.forEach(msg => {
+                const isSent = msg.senderId === currentUser.id || msg.senderUsername === currentUser.username;
+                const div = document.createElement('div');
+                div.className = `chat-message ${isSent ? 'sent' : 'received'}`;
+                div.innerHTML = `
+                    <strong>${isSent ? 'You' : 'Host'}:</strong><br>
+                    ${msg.content}
+                    <small class="d-block text-muted mt-1">${new Date(msg.timestamp).toLocaleString('bn-BD')}</small>
+                `;
+                chatBox.appendChild(div);
+            });
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+        } catch (err) {
+            console.error("Chat load error:", err);
+        }
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById("chat-input");
+        const content = input.value.trim();
+        if (!content || !currentUser) return;
+
+        try {
+            const res = await fetch(`${BACKEND_URL}/chat/send`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    roomId: parseInt(roomId),
+                    content
+                })
+            });
+
+            if (res.ok) {
+                input.value = "";
+                loadMessages();
+            } else {
+                alert("Message send failed");
+            }
+        } catch (err) {
+            console.error("Send error:", err);
+        }
+    }
+
+    function startPolling() {
+        if (pollingInterval) clearInterval(pollingInterval);
+        pollingInterval = setInterval(loadMessages, 5000); // 5 sec polling
+    }
+
+    /* =========================
+       ON LOAD
+    ========================= */
+    window.onload = () => {
+        if (!roomId) {
+            alert("Room ID not found in URL");
+            return;
+        }
+        loadRoom();
+    };
+
+    function logout() {
+        localStorage.removeItem('token');
+        window.location.href = '/login.html';
+    }
+
+</script>
+
+</body>
+</html>

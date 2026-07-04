@@ -1,0 +1,51 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f8f9fa;
+}
+.hero {
+    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.2)), url('https://images.unsplash.com/photo-1564507592333-c7ce0b7d4b3f') center/cover;
+    color: white;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+}
+.card {
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: none;
+    border-radius: 12px;
+}
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+.wishlist-btn {
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+
+.message.sent {
+    background: #dcf8c6 !important;
+    margin-left: auto !important;
+    text-align: right !important;
+}
+
+.message.received {
+    background: #ffffff !important;
+    margin-right: auto !important;
+    text-align: left !important;
+    border: 1px solid #e0e0e0 !important;
+}
+
+.chat-messages {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+

@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="bn" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>হোস্ট ড্যাশবোর্ড - HomeStayBD</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- FullCalendar CDN -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css' rel='stylesheet' />
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary: #ff385c;
+            --primary-dark: #e31c3d;
+            --light-bg: #f7f7f7;
+            --dark-bg: #0f0f0f;
+            --card-bg: white;
+            --dark-card: #1a1a1a;
+            --text-muted: #717171;
+        }
+
+        [data-bs-theme="dark"] {
+            --light-bg: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --text-muted: #b0b0b0;
+        }
+
+        body {
+            background: var(--light-bg);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding-top: 80px;
+        }
+
+        .navbar {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+        }
+
+        [data-bs-theme="dark"] .navbar {
+            background: rgba(26,26,26,0.95);
+            border-bottom: 1px solid #333;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: #222 !important;
+        }
+
+        [data-bs-theme="dark"] .nav-link {
+            color: #eee !important;
+        }
+
+        .summary-card {
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+            background: var(--card-bg);
+        }
+
+        .summary-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .tab-content {
+            margin-top: 2rem;
+        }
+
+        .room-card, .booking-card {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+            background: var(--card-bg);
+        }
+
+        .room-card:hover, .booking-card:hover {
+            transform: translateY(-6px);
+        }
+
+        .badge-primary {
+            background: var(--primary);
+        }
+
+        .message-item {
+            padding: 1rem;
+            border-radius: 12px;
+            background: #f8f9fa;
+            margin-bottom: 0.75rem;
+        }
+
+        [data-bs-theme="dark"] .message-item {
+            background: #222;
+        }
+
+        .nav-tabs .nav-link {
+            color: var(--text-muted);
+            border: none;
+            font-weight: 500;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+
+        /* Chat styles - Improved & Beautiful */
+        .chat-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .chat-messages {
+            background: #f8f9fa;
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .chat-message {
+            max-width: 70%;
+            margin-bottom: 1.2rem;
+            padding: 1rem 1.2rem;
+            border-radius: 18px;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .chat-message.sent {
+            background: var(--primary);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-message.received {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .chat-input-area {
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .chat-input-area .input-group {
+            background: #f1f3f5;
+            border-radius: 50px;
+            padding: 0.4rem;
+        }
+
+        .chat-input-area input {
+            border: none;
+            background: transparent;
+            padding: 0.75rem 1.25rem;
+        }
+
+        .chat-input-area button {
+            border-radius: 50px !important;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .no-chat-placeholder {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+        }
+
+        .preview-img {
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .image-preview-container img {
+            width: 120px;
+            height: 80px;
+            object-fit: cover;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ==================== NAVBAR ==================== -->
+<nav class="navbar navbar-expand-lg fixed-top shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-3" href="#" style="color: var(--primary);">HomeStayBD</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center gap-3">
+                <li class="nav-item">
+                    <span class="nav-link fw-semibold" id="user-role-display"></span>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-outline-secondary rounded-circle p-2" id="dark-mode-toggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-danger fw-bold" href="#" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-1"></i> লগআউট
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- ==================== MAIN CONTENT ==================== -->
+<div class="container py-5">
+
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-5" id="summary-cards">
+        <div class="col-md-3">
+            <div class="summary-card text-center">
+                <h6 class="text-muted mb-1">এই মাসের আয়</h6>
+                <h3 class="fw-bold" id="earnings-this-month">৳০</h3>
+                <small class="text-success"><i class="fas fa-arrow-up"></i> +০%</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-card text-center">
+                <h6 class="text-muted mb-1">আগামী চেক-ইন</h6>
+                <h3 class="fw-bold" id="upcoming-checkins">০</h3>
+                <small class="text-muted">আজ/কাল</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-card text-center position-relative">
+                <h6 class="text-muted mb-1">নতুন মেসেজ</h6>
+                <h3 class="fw-bold" id="unread-messages">০</h3>
+                <span class="badge bg-danger position-absolute top-0 end-0" id="unread-count">0</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="summary-card text-center">
+                <h6 class="text-muted mb-1">পেন্ডিং অনুরোধ</h6>
+                <h3 class="fw-bold text-warning" id="pending-requests">০</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs mb-4" id="hostTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button">ড্যাশবোর্ড</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="listings-tab" data-bs-toggle="tab" data-bs-target="#listings" type="button">লিস্টিং</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="calendar-tab" data-bs-toggle="tab" data-bs-target="#calendar" type="button">ক্যালেন্ডার</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="reservations-tab" data-bs-toggle="tab" data-bs-target="#reservations" type="button">রিজার্ভেশন</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="messages-tab" data-bs-toggle="tab" data-bs-target="#messages" type="button">মেসেজ</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="earnings-tab" data-bs-toggle="tab" data-bs-target="#earnings" type="button">আয়</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button">রিভিউ</button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="hostTabContent">
+
+        <!-- Dashboard Tab -->
+        <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title mb-4">দ্রুত অ্যাকশন</h5>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <button class="btn btn-outline-primary w-100 py-3" onclick="document.getElementById('add-room-form').scrollIntoView({behavior: 'smooth'})">
+                                        <i class="fas fa-plus-circle fa-2x mb-2"></i><br>নতুন রুম যোগ
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-outline-success w-100 py-3" onclick="document.getElementById('new-bookings-list').scrollIntoView({behavior: 'smooth'})">
+                                        <i class="fas fa-bell fa-2x mb-2"></i><br>নতুন বুকিং চেক
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-outline-info w-100 py-3" onclick="document.getElementById('chat-list').scrollIntoView({behavior: 'smooth'})">
+                                        <i class="fas fa-comments fa-2x mb-2"></i><br>নতুন মেসেজ
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h5 class="mb-3">সুপারহোস্ট স্ট্যাটাস</h5>
+                            <i class="fas fa-star fa-3x text-warning mb-3"></i>
+                            <h6 class="text-muted">আপনি এখনো সুপারহোস্ট নন</h6>
+                            <small>৪.৮+ রেটিং ও ১০+ বুকিং দরকার</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Listings Tab -->
+        <div class="tab-pane fade" id="listings" role="tabpanel">
+            <div class="row g-5">
+                <div class="col-lg-5">
+                    <div class="card border-0 shadow-sm p-4">
+                        <h4 class="fw-bold mb-4"><i class="fas fa-plus-circle text-success me-2"></i>নতুন রুম যোগ করুন</h4>
+                        <form id="add-room-form" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold required">রুমের নাম</label>
+                                <input type="text" class="form-control" name="title" required placeholder="যেমন: কক্সবাজার সী বিচ ভিউ রুম">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold required">বিবরণ</label>
+                                <textarea class="form-control" name="description" rows="4" required placeholder="রুমের বিস্তারিত বর্ণনা..."></textarea>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold required">লোকেশন</label>
+                                    <input type="text" class="form-control" name="location" required placeholder="যেমন: কক্সবাজার">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold required">প্রাইস / রাত (টাকা)</label>
+                                    <input type="number" class="form-control" name="price" min="500" step="0.01" required>
+                                </div>
+                            </div>
+                            <div class="mb-3 mt-3">
+                                <label class="form-label fw-semibold">সুবিধাসমূহ</label>
+                                <input type="text" class="form-control" name="facilities" placeholder="WiFi, AC, গরম পানি, কফি মেকার...">
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold required">রুমের ছবি (একাধিক সিলেক্ট করতে পারবেন)</label>
+                                <input type="file" class="form-control" name="images" accept="image/*" multiple required>
+                                <div class="image-preview-container mt-3" id="multi-image-preview"></div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg w-100" id="submit-btn">
+                                <i class="fas fa-upload me-2"></i> রুম যোগ করুন
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-lg-7">
+                    <h4 class="fw-bold mb-4"><i class="fas fa-home me-2"></i>আমার লিস্টিং</h4>
+                    <div class="row g-4" id="my-rooms-list">
+                        <div class="col-12 text-center py-5">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-3 text-muted">আপনার রুমগুলো লোড হচ্ছে...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Tab -->
+        <div class="tab-pane fade" id="calendar" role="tabpanel">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-4"><i class="far fa-calendar-alt me-2"></i>ক্যালেন্ডার</h4>
+                    <div id="calendar-container" style="height: 600px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reservations Tab -->
+        <div class="tab-pane fade" id="reservations" role="tabpanel">
+            <ul class="nav nav-pills mb-4">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pending-reservations">পেন্ডিং</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#upcoming-reservations">আগামী</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#completed-reservations">সম্পন্ন</button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="pending-reservations">
+                    <div class="row g-4" id="new-bookings-list">
+                        <div class="col-12 text-center py-5">
+                            <div class="spinner-border text-warning" role="status"></div>
+                            <p class="mt-3 text-muted">নতুন বুকিং লোড হচ্ছে...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="upcoming-reservations">
+                    <div class="row g-4" id="upcoming-bookings-list">
+                        <div class="col-12 text-center py-5">
+                            <div class="spinner-border text-info" role="status"></div>
+                            <p class="mt-3 text-muted">আগামী রিজার্ভেশন লোড হচ্ছে...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="completed-reservations">
+                    <div class="row g-4" id="completed-bookings-list">
+                        <div class="col-12 text-center py-5">
+                            <div class="spinner-border text-success" role="status"></div>
+                            <p class="mt-3 text-muted">সম্পন্ন রিজার্ভেশন লোড হচ্ছে...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages Tab - Updated & Beautiful -->
+        <div class="tab-pane fade" id="messages" role="tabpanel">
+            <div class="row g-4 h-100">
+                <!-- Left: Chat List -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="mb-4 fw-bold"><i class="fas fa-comments me-2 text-primary"></i>চ্যাট</h5>
+                            <div id="chat-list" class="overflow-auto" style="height: calc(100vh - 220px);">
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-info" role="status"></div>
+                                    <p class="mt-3 text-muted">চ্যাট লোড হচ্ছে...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Chat Window -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm h-100 d-flex flex-column overflow-hidden" style="border-radius: 16px;">
+
+                        <!-- Chat Header -->
+                        <div id="chat-header" class="d-none p-3 border-bottom d-flex align-items-center" style="background: linear-gradient(135deg, #ff385c, #e31c3d); color: white;">
+                            <img id="chat-room-image" src="/images/placeholder-room.jpg" class="rounded-circle me-3 shadow" width="50" height="50" alt="Room">
+                            <h5 id="chat-room-title" class="mb-0 fw-bold">চ্যাট শুরু করুন</h5>
+                        </div>
+
+                        <!-- Messages Area -->
+                        <div id="chat-messages" class="flex-grow-1 p-4 overflow-auto bg-gradient" style="background: linear-gradient(to bottom, #f8f9fa, #ffffff);">
+                            <div class="text-center py-5 text-muted" id="no-chat-selected">
+                                <i class="fas fa-comments fa-5x mb-4 opacity-50"></i>
+                                <h5>কোনো চ্যাট সিলেক্ট করুন</h5>
+                                <p>বাম পাশ থেকে একটি চ্যাট রুম বেছে নিন</p>
+                            </div>
+                        </div>
+
+                        <!-- Input Area -->
+                        <div id="chat-input-area" class="d-none p-3 border-top bg-white">
+                            <div class="input-group input-group-lg">
+                                <input id="message-input" type="text" class="form-control rounded-pill ps-4" placeholder="আপনার মেসেজ লিখুন..." style="border: 1px solid #dee2e6;">
+                                <button id="send-btn" class="btn btn-primary rounded-pill px-4 ms-2">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Earnings Tab -->
+        <div class="tab-pane fade" id="earnings" role="tabpanel">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-4"><i class="fas fa-wallet me-2 text-success"></i>আয়ের হিসাব</h4>
+                    <canvas id="earningsChart" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews Tab -->
+        <div class="tab-pane fade" id="reviews" role="tabpanel">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-4"><i class="fas fa-star me-2 text-warning"></i>রিভিউ ম্যানেজমেন্ট</h4>
+                    <div id="reviews-list">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-warning" role="status"></div>
+                            <p class="mt-3 text-muted">রিভিউ লোড হচ্ছে...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Room Modal -->
+<div class="modal fade" id="updateRoomModal" tabindex="-1" aria-labelledby="updateRoomModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateRoomModalLabel">রুম আপডেট করুন</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="update-room-form" enctype="multipart/form-data">
+                    <input type="hidden" id="update-room-id" name="id">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold required">রুমের নাম</label>
+                        <input type="text" class="form-control" id="update-title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold required">বিবরণ</label>
+                        <textarea class="form-control" id="update-description" name="description" rows="4" required></textarea>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold required">লোকেশন</label>
+                            <input type="text" class="form-control" id="update-location" name="location" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold required">প্রাইস / রাত (টাকা)</label>
+                            <input type="number" class="form-control" id="update-price" name="price" min="500" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="mb-3 mt-3">
+                        <label class="form-label fw-semibold">সুবিধাসমূহ</label>
+                        <input type="text" class="form-control" id="update-facilities" name="facilities">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">নতুন ছবি (চাইলে পরিবর্তন করুন)</label>
+                        <input type="file" class="form-control" name="image" accept="image/*">
+                        <img id="update-image-preview" class="preview-img img-fluid mt-3" alt="প্রিভিউ" style="display:none;">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">আপডেট সেভ করুন</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmModalLabel">রুম ডিলিট করবেন?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                এই রুম পুরোপুরি মুছে যাবে। এটা আর ফিরিয়ে আনা যাবে না।
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-btn">ডিলিট করুন</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="bg-dark text-light py-5 mt-5">
+    <div class="container text-center">
+        <p class="mb-2">© ২০২৬ HomeStayBD. সর্বস্বত্ব সংরক্ষিত।</p>
+        <small class="text-secondary">Developed with ❤️ in Bangladesh</small>
+    </div>
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
+
+<!-- Optional: SweetAlert2 টোস্ট/নোটিফিকেশনের জন্য (সুন্দর দেখাবে) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    console.log("=== SCRIPT LOADED SUCCESSFULLY ===");
+
+    const backendUrl = 'http://localhost:8080';
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        console.warn("No token found - redirecting to login");
+        window.location.href = '/login.html';
+    }
+
+    let currentRoomId = null;
+    let currentUserId = null;
+
+    async function apiFetch(endpoint, options = {}) {
+        console.log(`apiFetch called for: ${endpoint}`, options.method || 'GET');
+        const headers = {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+            ...options.headers
+        };
+
+        if (options.body instanceof FormData) {
+            delete headers['Content-Type'];
+        } else if (options.body && typeof options.body === 'object') {
+            headers['Content-Type'] = 'application/json';
+        }
+
+        try {
+            const res = await fetch(`${backendUrl}${endpoint}`, { ...options, headers });
+            console.log(`Response status for ${endpoint}: ${res.status}`);
+            if (!res.ok) {
+                const text = await res.text();
+                console.error(`API error ${res.status}: ${text}`);
+                if (res.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                }
+                throw new Error(`API Error ${res.status}: ${text}`);
+            }
+            return res.headers.get('content-type')?.includes('json') ? res.json() : res.text();
+        } catch (err) {
+            console.error(`apiFetch failed for ${endpoint}:`, err);
+            throw err;
+        }
+    }
+
+    // লোড ইউজার ডাটা + currentUserId সেট
+    async function loadUserData() {
+        try {
+            const user = await apiFetch('/auth/me');
+            document.getElementById('user-role-display').textContent = user.role === 'OWNER' ? 'হোস্ট' : 'ইউজার';
+            currentUserId = user.id;
+            console.log("User loaded:", user, "Current User ID:", currentUserId);
+        } catch (err) {
+            console.error("User load failed:", err);
+        }
+    }
+
+    // লোড রুম (লিস্টিং) — অপরিবর্তিত
+    async function loadMyRooms() {
+        console.log("loadMyRooms called - starting...");
+        const container = document.getElementById('my-rooms-list');
+        if (!container) {
+            console.error("#my-rooms-list not found in DOM");
+            return;
+        }
+
+        container.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-3">আপনার রুমগুলো লোড হচ্ছে...</p></div>`;
+
+        try {
+            const rooms = await apiFetch('/api/rooms/my');
+            console.log("Rooms data received:", rooms);
+
+            container.innerHTML = '';  // Loading clear
+
+            if (rooms.length === 0) {
+                container.innerHTML = '<p class="text-center py-5 text-muted">আপনার কোনো রুম নেই। নতুন রুম যোগ করুন।</p>';
+            } else {
+                rooms.forEach(room => {
+                    const imgSrc = room.imagePath
+                        ? `${backendUrl}${room.imagePath.startsWith('/') ? '' : '/'}${room.imagePath}`
+                        : '/images/placeholder-room.jpg';
+
+                    container.innerHTML += `
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                <img src="${imgSrc}" class="card-img-top" style="height:180px; object-fit:cover;" onerror="this.src='/images/placeholder-room.jpg'">
+                                <div class="card-body">
+                                    <h5 class="card-title">${room.title}</h5>
+                                    <p class="text-muted">${room.location} • ৳${room.price}/রাত</p>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+            }
+            console.log("Rooms rendered, total:", rooms.length);
+        } catch (err) {
+            console.error("Room load error:", err);
+            container.innerHTML = `<p class="text-danger text-center py-5">লোড করতে সমস্যা: ${err.message}</p>`;
+        }
+    }
+
+    // রুম যোগ করার ফর্ম submit handler — অপরিবর্তিত
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('add-room-form');
+        if (!form) {
+            console.error("Form #add-room-form not found in DOM");
+            return;
+        }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log("Form submit triggered!");
+
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerText = "যোগ হচ্ছে...";
+
+            try {
+                const formData = new FormData(form);
+
+                console.log("=== FormData Debug Start ===");
+                for (let [key, value] of formData.entries()) {
+                    if (value instanceof File) {
+                        console.log(`${key}: File → ${value.name} (${value.size} bytes, type: ${value.type})`);
+                    } else {
+                        console.log(`${key}: ${value}`);
+                    }
+                }
+                console.log("=== FormData Debug End ===");
+
+                const response = await apiFetch('/api/rooms/add', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                console.log("Add room success:", response);
+                alert('রুম যোগ হয়েছে!');
+                form.reset();
+                loadMyRooms();
+            } catch (err) {
+                console.error("Add room error:", err);
+                alert('সমস্যা: ' + err.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "রুম যোগ করুন";
+            }
+        });
+
+        console.log("Form submit listener attached successfully");
+    });
+
+    // PENDING BOOKINGS — অপরিবর্তিত
+    async function loadPendingBookings() {
+        const container = document.getElementById('new-bookings-list');
+        if (!container) {
+            console.error("Element #new-bookings-list not found");
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-warning" role="status"></div>
+                <p class="mt-3 text-muted">নতুন বুকিং লোড হচ্ছে...</p>
+            </div>`;
+
+        try {
+            console.log("Fetching pending bookings...");
+            const data = await apiFetch('/api/bookings/pending');
+            console.log("Pending data:", data);
+
+            container.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 text-center py-5 text-muted">
+                        <i class="bi bi-calendar-x fs-1"></i>
+                        <p class="mt-3">কোনো পেন্ডিং বুকিং নেই</p>
+                    </div>`;
+                return;
+            }
+
+            renderPendingBookings(data, container);
+
+        } catch (err) {
+            console.error("Pending error:", err);
+            container.innerHTML = `
+                <div class="col-12 text-center py-5 text-danger">
+                    <p>সমস্যা: ${err.message}</p>
+                    <button class="btn btn-sm btn-outline-danger" onclick="loadPendingBookings()">আবার চেষ্টা করুন</button>
+                </div>`;
+        }
+    }
+
+    function renderPendingBookings(bookings, container) {
+        bookings.forEach(booking => {
+            let imgSrc = '/images/placeholder-room.jpg';
+            if (booking.room && booking.room.imagePath) {
+                imgSrc = booking.room.imagePath.startsWith('/uploads') || booking.room.imagePath.startsWith('/images')
+                    ? `${backendUrl}${booking.room.imagePath}`
+                    : booking.room.imagePath;
+            }
+
+            const roomTitle = booking.room?.title || 'রুম #' + (booking.room?.id || 'N/A');
+            const guestName = booking.user?.username || 'অজানা';
+            const checkIn  = booking.checkInDate ? new Date(booking.checkInDate).toLocaleDateString('bn-BD') : 'N/A';
+            const checkOut = booking.checkOutDate ? new Date(booking.checkOutDate).toLocaleDateString('bn-BD') : 'N/A';
+            const totalPrice = booking.totalPrice || 0;
+
+            const card = document.createElement('div');
+            card.className = 'col-md-6 col-lg-4 mb-4';
+            card.innerHTML = `
+                <div class="card shadow-sm border-warning h-100">
+                    <img src="${imgSrc}" class="card-img-top" alt="${roomTitle}"
+                         style="height: 180px; object-fit: cover;"
+                         onerror="this.src='/images/placeholder-room.jpg'">
+                    <div class="card-body">
+                        <h5 class="card-title text-warning">${roomTitle}</h5>
+                        <p class="card-text">
+                            <strong>গেস্ট:</strong> ${guestName}<br>
+                            <strong>চেক-ইন:</strong> ${checkIn}<br>
+                            <strong>চেক-আউট:</strong> ${checkOut}<br>
+                            <strong>মূল্য:</strong> ৳${totalPrice}<br>
+                            <strong>স্ট্যাটাস:</strong> <span class="badge bg-warning">পেন্ডিং</span>
+                        </p>
+                        <div class="d-flex gap-2 mt-3">
+                            <button class="btn btn-success btn-sm" onclick="confirmBooking(${booking.id})">
+                                নিশ্চিত করুন
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="cancelBooking(${booking.id})">
+                                বাতিল করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+            container.appendChild(card);
+        });
+    }
+
+    function confirmBooking(id) {
+        if (confirm("এই বুকিং নিশ্চিত করবেন?")) {
+            console.log("Confirming booking ID:", id);
+            alert("নিশ্চিত করা হয়েছে (এখনো backend API যোগ করা হয়নি)");
+            loadPendingBookings();
+        }
+    }
+
+    function cancelBooking(id) {
+        if (confirm("এই বুকিং বাতিল করবেন?")) {
+            console.log("Cancelling booking ID:", id);
+            alert("বাতিল করা হয়েছে (এখনো backend API যোগ করা হয়নি)");
+            loadPendingBookings();
+        }
+    }
+
+    // পেজ লোড হলে + ট্যাব চেঞ্জে pending লোড — অপরিবর্তিত
+    document.addEventListener('DOMContentLoaded', async () => {
+        console.log("DOM ready - initializing...");
+        await loadUserData();
+        loadMyRooms();
+
+        const pendingTabBtn = document.querySelector('[data-bs-target="#pending-reservations"]');
+        if (pendingTabBtn) {
+            pendingTabBtn.addEventListener('shown.bs.tab', function () {
+                console.log("Pending reservations tab activated - loading pending bookings");
+                loadPendingBookings();
+            });
+        }
+
+        const reservationsTabBtn = document.querySelector('[data-bs-target="#reservations"]');
+        if (reservationsTabBtn) {
+            reservationsTabBtn.addEventListener('shown.bs.tab', function () {
+                if (document.getElementById('pending-reservations').classList.contains('show') ||
+                    document.getElementById('pending-reservations').classList.contains('active')) {
+                    loadPendingBookings();
+                }
+            });
+        }
+
+        // Messages ট্যাব অ্যাকটিভ হলে চ্যাট লোড
+        const messagesTabBtn = document.querySelector('[data-bs-target="#messages"]');
+        if (messagesTabBtn) {
+            messagesTabBtn.addEventListener('shown.bs.tab', function () {
+                console.log("Messages tab activated - loading chat list");
+                loadChatList();
+            });
+        }
+    });
+
+    // ট্যাব চেঞ্জে রিলোড — অপরিবর্তিত
+    document.querySelectorAll('.nav-link[data-bs-toggle="tab"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', e => {
+            const target = e.target.getAttribute('data-bs-target').substring(1);
+            if (target === 'listings') {
+                console.log("Listings tab activated - reloading rooms");
+                loadMyRooms();
+            }
+        });
+    });
+
+    // calendar.js — অপরিবর্তিত
+    document.addEventListener('DOMContentLoaded', function() {
+        const calendarEl = document.getElementById('calendar');
+        if (!calendarEl) return;
+
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'bn',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek'
+            },
+            events: async function(fetchInfo, successCallback, failureCallback) {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch(`${backendUrl}/api/calendar/availability`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (!response.ok) throw new Error('Failed to load calendar');
+
+                    const events = await response.json();
+                    successCallback(events.map(ev => ({
+                        title: ev.roomTitle || 'রুম বুকড',
+                        start: ev.startDate,
+                        end: ev.endDate,
+                        backgroundColor: ev.status === 'BOOKED' ? '#f87171' : '#34d399',
+                        borderColor: ev.status === 'BOOKED' ? '#ef4444' : '#10b981'
+                    })));
+                } catch (err) {
+                    console.error('Calendar load error:', err);
+                    failureCallback(err);
+                }
+            },
+            eventClick: function(info) {
+                alert(`রুম: ${info.event.title}\nশুরু: ${info.event.start.toLocaleDateString('bn-BD')}`);
+            }
+        });
+
+        calendar.render();
+    });
+
+    // reservations.js — অপরিবর্তিত
+    async function loadReservations() {
+        const container = document.getElementById('reservations-list');
+        if (!container) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${backendUrl}/api/bookings/my`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    alert('লগইন করুন অথবা হোস্ট অ্যাকাউন্ট ব্যবহার করুন');
+                    return;
+                }
+                throw new Error('Failed to load reservations');
+            }
+
+            const bookings = await response.json();
+            container.innerHTML = '';
+
+            if (bookings.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500">কোনো রিজার্ভেশন নেই</p>';
+                return;
+            }
+
+            bookings.forEach(booking => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-lg shadow mb-4';
+                card.innerHTML = `
+                    <h3 class="font-bold">${booking.roomTitle || 'রুম #' + booking.roomId}</h3>
+                    <p>গেস্ট: ${booking.guestName || 'N/A'}</p>
+                    <p>তারিখ: ${new Date(booking.startDate).toLocaleDateString('bn-BD')} -
+                       ${new Date(booking.endDate).toLocaleDateString('bn-BD')}</p>
+                    <p class="status ${booking.status.toLowerCase()}">
+                        স্ট্যাটাস: ${booking.status === 'CONFIRMED' ? 'নিশ্চিত' :
+                                     booking.status === 'PENDING' ? 'পেন্ডিং' : 'বাতিল'}
+                    </p>
+                    <p class="text-green-600 font-semibold">মোট: ৳${booking.totalPrice}</p>
+                `;
+                container.appendChild(card);
+            });
+        } catch (err) {
+            console.error(err);
+            container.innerHTML = '<p class="text-red-500">রিজার্ভেশন লোড করতে সমস্যা হয়েছে</p>';
+        }
+    }
+
+    if (window.location.pathname.includes('owner-dashboard') || window.location.pathname.includes('reservations')) {
+        loadReservations();
+    }
+
+    // ======================
+// চ্যাট ফিচার — ক্লিক সমস্যা ১০০% ঠিক করা হয়েছে
+// ======================
+
+async function loadChatList() {
+    const container = document.getElementById('chat-list');
+    if (!container) return console.error("#chat-list not found");
+
+    container.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-info" role="status"></div>
+            <p class="mt-3 text-muted">চ্যাট লোড হচ্ছে...</p>
+        </div>`;
+
+    try {
+        const chatRooms = await apiFetch('/api/chat/rooms');
+        console.log("Chat rooms loaded:", chatRooms);
+
+        container.innerHTML = '';
+
+        if (!chatRooms?.length) {
+            container.innerHTML = '<p class="text-center py-5 text-muted">কোনো চ্যাট নেই</p>';
+            return;
+        }
+
+        chatRooms.forEach(room => {
+            const div = document.createElement('div');
+            div.className = 'chat-room-item p-3 border-bottom d-flex align-items-center';
+            div.style.cursor = 'pointer';
+            div.dataset.roomId = room.roomId;
+            div.innerHTML = `
+                <img src="${backendUrl + (room.roomImage || '/images/placeholder-room.jpg')}"
+                     class="rounded-circle me-3" width="50" height="50" alt="${room.roomTitle}">
+                <div class="flex-grow-1">
+                    <h6 class="mb-1">${room.roomTitle || 'রুম চ্যাট'}</h6>
+                    <small class="text-muted text-truncate d-block">${room.lastMessage || 'কোনো মেসেজ নেই'}</small>
+                </div>
+                ${room.unreadCount ? `<span class="badge bg-danger">${room.unreadCount}</span>` : ''}
+            `;
+            container.appendChild(div);
+        });
+
+        // ক্লিক হ্যান্ডলার
+        container.addEventListener('click', function(e) {
+            const item = e.target.closest('.chat-room-item');
+            if (item) {
+                const roomId = item.dataset.roomId;
+                if (roomId) {
+                    console.log("রুম ক্লিক → ID:", roomId);
+                    openChatRoom(roomId, item.querySelector('h6')?.textContent.trim(), item.querySelector('img')?.src);
+                }
+            }
+        });
+
+    } catch (err) {
+        console.error("Chat list error:", err);
+        container.innerHTML = `<p class="text-danger text-center py-5">সমস্যা: ${err.message}</p>`;
+    }
+}
+
+// চ্যাট রুম খোলা
+function openChatRoom(roomId, roomTitle, roomImageSrc) {
+    currentRoomId = roomId;
+    console.log("openChatRoom called with ID:", currentRoomId);
+
+    // UI toggle
+    document.getElementById('no-chat-selected')?.classList.add('d-none');
+    document.getElementById('chat-header')?.classList.remove('d-none');
+    document.getElementById('chat-messages')?.classList.remove('d-none');
+    document.getElementById('chat-input-area')?.classList.remove('d-none');
+
+    // হেডার আপডেট
+    document.getElementById('chat-room-title').textContent = roomTitle || 'চ্যাট';
+    document.getElementById('chat-room-image').src = roomImageSrc || '/images/placeholder-room.jpg';
+
+    // মেসেজ লোড
+    loadRoomMessages(roomId);
+}
+
+// মেসেজ লোড
+async function loadRoomMessages(roomId) {
+    const chatBox = document.getElementById('chat-messages');
+    if (!chatBox) return console.error("#chat-messages not found");
+
+    chatBox.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div><p>মেসেজ লোড হচ্ছে...</p></div>';
+
+    try {
+        const messages = await apiFetch(`/api/chat/room/${roomId}`);
+        console.log(`Room ${roomId} messages:`, messages);
+
+        chatBox.innerHTML = '';
+
+        messages.forEach(msg => {
+            const isSentByMe = msg.senderId === currentUserId;
+            const bubble = document.createElement('div');
+            bubble.className = `chat-message ${isSentByMe ? 'sent' : 'received'}`;
+            bubble.innerHTML = `
+                ${msg.content}
+                <small class="d-block mt-1 opacity-75">
+                    ${new Date(msg.timestamp).toLocaleTimeString('bn-BD', {hour: '2-digit', minute:'2-digit'})}
+                </small>
+            `;
+            chatBox.appendChild(bubble);
+        });
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+    } catch (err) {
+        console.error("Load messages error:", err);
+        chatBox.innerHTML = '<p class="text-danger text-center py-5">মেসেজ লোডে সমস্যা</p>';
+    }
+}
+
+// মেসেজ পাঠানো
+async function sendChatMessage() {
+    const input = document.getElementById('message-input');
+    const content = input?.value?.trim();
+
+    if (!content) return;
+    if (!currentRoomId) {
+        console.error("No room selected!");
+        return alert("কোনো চ্যাট রুম সিলেক্ট করুন");
+    }
+
+    console.log("Sending message to room:", currentRoomId, "Content:", content);
+
+    try {
+        const response = await apiFetch('/api/chat/send', {
+            method: 'POST',
+            body: JSON.stringify({
+                roomId: currentRoomId,
+                content: content
+            })
+        });
+
+        console.log("Send response:", response);
+
+        input.value = '';
+        loadRoomMessages(currentRoomId);  // রিফ্রেশ
+
+    } catch (err) {
+        console.error("Send message failed:", err);
+        alert("মেসেজ পাঠাতে সমস্যা: " + (err.message || "Unknown error"));
+    }
+}
+
+// ইভেন্ট লিসেনার — DOM ready-তে
+document.addEventListener('DOMContentLoaded', () => {
+    // সেন্ড বাটন
+    const sendBtn = document.getElementById('send-btn');
+    if (sendBtn) {
+        sendBtn.addEventListener('click', sendChatMessage);
+    }
+
+    // Enter প্রেস করলে সেন্ড
+    const input = document.getElementById('message-input');
+    if (input) {
+        input.addEventListener('keypress', e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendChatMessage();
+            }
+        });
+    }
+
+    // Messages ট্যাব খুললে চ্যাট লোড
+    const messagesTab = document.querySelector('[data-bs-target="#messages"]');
+    if (messagesTab) {
+        messagesTab.addEventListener('shown.bs.tab', () => {
+            console.log("Messages tab opened - loading chat list");
+            loadChatList();
+        });
+    }
+});
+    // ======================
+    // REVIEWS — লোডিং সমস্যা ঠিক করা হয়েছে
+    // ======================
+
+    async function loadReviews(roomId = null) {
+        const container = document.getElementById('reviews-list');
+        if (!container) {
+            console.error("#reviews-list element পাওয়া যায়নি");
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-3">রিভিউ লোড হচ্ছে...</p>
+            </div>`;
+
+        try {
+            const url = roomId
+                ? `/api/reviews/room/${roomId}`
+                : `/api/reviews/my-received`;
+
+            const reviews = await apiFetch(url);
+            console.log("Reviews loaded:", reviews);
+
+            container.innerHTML = '';
+
+            if (!reviews || reviews.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-star fa-4x mb-3 opacity-50"></i>
+                        <p>কোনো রিভিউ পাওয়া যায়নি</p>
+                    </div>`;
+                return;
+            }
+
+            reviews.forEach(review => {
+                const div = document.createElement('div');
+                div.className = 'bg-white p-4 rounded shadow-sm mb-3 border-start border-4 border-primary';
+                div.innerHTML = `
+                    <div class="d-flex justify-content-between mb-2">
+                        <div>
+                            <span class="text-warning fs-4">
+                                ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+                            </span>
+                            <span class="ms-2 fw-bold">${review.guestName || 'Anonymous'}</span>
+                        </div>
+                        <small class="text-muted">
+                            ${new Date(review.createdAt).toLocaleDateString('bn-BD')}
+                        </small>
+                    </div>
+                    <p class="mb-0">${review.comment || 'কোনো কমেন্ট নেই'}</p>
+                `;
+                container.appendChild(div);
+            });
+
+        } catch (err) {
+            console.error("রিভিউ লোডে সমস্যা:", err);
+            container.innerHTML = `
+                <div class="text-center py-5 text-danger">
+                    <p>রিভিউ লোড করতে সমস্যা: ${err.message}</p>
+                    <button class="btn btn-sm btn-outline-danger mt-2" onclick="loadReviews()">আবার চেষ্টা করুন</button>
+                </div>`;
+        }
+    }
+
+    // reviews পেজে অটো লোড (যদি থাকে)
+    if (window.location.pathname.includes('reviews') || window.location.pathname.includes('room-details')) {
+        const roomId = new URLSearchParams(window.location.search).get('id');
+        if (roomId) {
+            loadReviews(parseInt(roomId));
+        } else {
+            loadReviews();
+        }
+    }
+
+</script>
+
+</body>
+</html>
