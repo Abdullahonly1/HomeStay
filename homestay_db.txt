@@ -1,0 +1,122 @@
+
+CREATE DATABASE IF NOT EXISTS homestay_db 
+CHARACTER SET utf8mb4 
+COLLATE utf8mb4_unicode_ci;
+
+
+USE homestay_db;
+
+
+
+-- 1. Users টেবিল (গেস্ট, হোস্ট, অ্যাডমিন)
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    phone VARCHAR(15) UNIQUE,
+    password VARCHAR(255) NOT NULL,          -- hashed password
+    role ENUM('GUEST', 'HOST', 'ADMIN') DEFAULT 'GUEST' NOT NULL,
+    profile_photo_url VARCHAR(255),
+    bio TEXT,
+    district VARCHAR(50),                     -- e.g., Cox's Bazar
+    division VARCHAR(50),                     -- e.g., Chattogram
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 2. Rooms টেবিল (হোমস্টে রুম)
+CREATE TABLE IF NOT EXISTS rooms (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    host_id BIGINT NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    description TEXT,
+    price_per_night DECIMAL(10, 2) NOT NULL,
+    max_guests INT NOT NULL DEFAULT 2,
+    location VARCHAR(100) NOT NULL,           -- e.g., "Cox's Bazar, Inani Beach"
+    latitude DOUBLE,
+    longitude DOUBLE,
+    is_women_friendly BOOLEAN DEFAULT FALSE,
+    is_student_budget BOOLEAN DEFAULT FALSE,
+    status ENUM('ACTIVE', 'INACTIVE', 'PENDING') DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (host_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 3. Room Amenities (রুমের সুবিধা – many-to-many)
+CREATE TABLE IF NOT EXISTS room_amenities (
+    room_id BIGINT NOT NULL,
+    amenity VARCHAR(50) NOT NULL,             -- e.g., "AC", "WiFi", "Attached Bath", "Local Food"
+    
+    PRIMARY KEY (room_id, amenity),
+    FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE
+);
+
+-- 4. Room Images
+CREATE TABLE IF NOT EXISTS room_images (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    room_id BIGINT NOT NULL,
+    image_url VARCHAR(255) NOT NULL,
+    description VARCHAR(100),
+    is_primary BOOLEAN DEFAULT FALSE,
+    
+    FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE
+);
+
+-- 5. Bookings টেবিল (বুকিং)
+CREATE TABLE IF NOT EXISTS bookings (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    room_id BIGINT NOT NULL,
+    guest_id BIGINT NOT NULL,
+    check_in_date DATE NOT NULL,
+    check_out_date DATE NOT NULL,
+    total_price DECIMAL(10, 2) NOT NULL,
+    guests_count INT NOT NULL,
+    status ENUM('PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED') DEFAULT 'PENDING',
+    payment_status ENUM('PENDING', 'PAID', 'REFUNDED') DEFAULT 'PENDING',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE,
+    FOREIGN KEY (guest_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 6. Reviews টেবিল (রিভিউ + রেটিং)
+CREATE TABLE IF NOT EXISTS reviews (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    booking_id BIGINT NOT NULL,
+    reviewer_id BIGINT NOT NULL,
+    rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
+    FOREIGN KEY (reviewer_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 7. Optional: Payments (SSLCommerz বা bKash-এর জন্য)
+CREATE TABLE IF NOT EXISTS payments (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    booking_id BIGINT NOT NULL,
+    transaction_id VARCHAR(100),
+    amount DECIMAL(10, 2) NOT NULL,
+    payment_method ENUM('SSLCommerz', 'bKash', 'Nagad', 'Cash') NOT NULL,
+    status ENUM('PENDING', 'SUCCESS', 'FAILED') DEFAULT 'PENDING',
+    paid_at TIMESTAMP,
+    
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
+);
+
+
+
+-- Sample User (Host)
+INSERT INTO users (full_name, email, phone, password, role, district, division) 
+VALUES ('Rahim Mia', 'host@example.com', '01712345678', 'hashed_password_here', 'HOST', 'Cox\'s Bazar', 'Chattogram');
+
+-- Sample Room
+INSERT INTO rooms (host_id, title, description, price_per_night, max_guests, location, latitude, longitude) 
+VALUES (1, 'Sea View Cozy Room', 'Beautiful sea facing room with local food option', 1500.00, 2, 'Cox\'s Bazar, Kolatoli', 21.4272, 92.0058);
+
+-- Sample Amenity
+INSERT INTO room_amenities (room_id, amenity) VALUES (1, 'AC'), (1, 'WiFi'), (1, 'Local Food');
